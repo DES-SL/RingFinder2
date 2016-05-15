@@ -1,8 +1,8 @@
 # BlueRings
 
-An extended re-implementation of Gavazzi et al's RingFinder galaxy-scale strong gravitational lens detection robot. Subtract red light from blue, analyze residuals, classify. Helping find lenses in the DES images since May 2016.
+An extended re-implementation of Gavazzi et al's RingFinder galaxy-scale strong gravitational lens detection robot. Subtract LRG-colored light from all filters, analyze residuals, classify. Helping find lenses in the DES images since May 2016.
 
-For an introduction to the basic method, check out the original paper: ["RingFinder: automated detection of galaxy-scale gravitational lenses in ground-based multi-filter imaging data" by Raphael Gavazzi et al (2014)](http://arxiv.org/abs/1403.1041). We are trying to extend this method to be able to make *color residuals*, and are investigating improved ways to interpret those residuals.
+For an introduction to the basic method, check out the original paper: ["RingFinder: automated detection of galaxy-scale gravitational lenses in ground-based multi-filter imaging data" by Raphael Gavazzi et al (2014)](http://arxiv.org/abs/1403.1041). We are trying to extend this method to be able to make *color residuals*, and are investigating improved ways to interpret those residuals: the current thinking is discussed in [issue 6](https://github.com/DES-SL/BlueRings/issues/6).
 
 ## Demos
 
