@@ -9,7 +9,7 @@ import string
 import getopt
 from BlueRings import BlueRings 
 plt.ion()
-
+ 
 class RingFindforTile(exceptions.Exception):
     def __init__(self, ):
         self.MakeTag = 0
