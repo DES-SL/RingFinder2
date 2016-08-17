@@ -95,10 +95,12 @@ class BlueRings():
         
         self.findCoM(bands[-1])
         
-        #self.psfmatch() #not implemented currently.
+        if psfmode=="match":
+            self.psfmatch()
 
         self.subdict,self.subsigdict=self.imagesubtract(imdict,sigdict)
         #self.plot()
+
 
     def findCoM(self,band="z"):
         B=self.imdict[self.bands[0]]
@@ -113,6 +115,11 @@ class BlueRings():
         self.dcent=self.rcent*self.pixelsize
 
         #self.com=(self.xc,self.yc)
+
+    def psfmatch(self,band="z"):
+        self.imdict["g"]=convolve(self.imdict["g"],self.psfdict['z'])[0]
+        self.imdict["z"]=convolve(self.imdict["z"],self.psfdict['g'])[0]
+
 
     def imagesubtract(self,imdict,sigdict,bandtosubtract='z',matchradius=5):
 
@@ -131,16 +138,35 @@ class BlueRings():
                               alpha*sigdict[bandtosubtract]**2
                               )**0.5
 
+            print band,sigdict[band].mean(),alpha,sigdict[bandtosubtract].mean()
+
         return subdict,subsigdict
            
 
-    def residualAnalyse(self):
-        pass
+    def residualAnalyse(self,threshold):
+        import pylab as plt
 
+        D=self.subdict['g'].ravel()
+        S=self.subsigdict['g'].ravel()
+
+        args=numpy.argsort(-D/S)
+        D=numpy.take(D,args)
+        S=numpy.take(S,args)
+
+        Dsum=numpy.cumsum(D)
+        Ssum=(numpy.cumsum(S**2))**0.5
+
+        SN=(Dsum/Ssum).max()
+        print SN
+
+        if SN>threshold:return True
+        else: return False
+        
  
-    def plot(self):
+    def plot(self,input=True):
         import pylab as plt
         import colorImage
+        plt.figure(1)
         plt.subplot(131)
         color = colorImage.ColorImage()
         colorimage = color.createModel(self.imdict['g'],self.imdict['r'],self.imdict['i'])
@@ -153,4 +179,5 @@ class BlueRings():
         self.subdict['g'][self.subdict['g']<0]=0
         plt.imshow(self.subdict['g'],interpolation="none")
         plt.draw()
-        return raw_input()
+        if input:return raw_input()
+        else: return

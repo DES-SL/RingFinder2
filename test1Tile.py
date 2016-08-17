@@ -108,16 +108,21 @@ class RingFindforTile(exceptions.Exception):
 
             #BR=BlueRings(imdict,sigdict,psfdict)
             
-            if objectN in interesting or int(objectN)>3017265667:
+            #if objectN in interesting or int(objectN)>3017265667:
+            if 1==1:
                 BR=BlueRings(imdict,sigdict,psfdict)
-                inter=BR.plot()
-                if inter!="":interesting.append(objectN)
-                print "[",
-                for inter in interesting:
-                    print "\"%s\","%inter,
-                print"]"
-
-
+                if BR.residualAnalyse(.2):
+                    inter=BR.plot()
+                else:
+                    inter=""
+                #if inter!="":interesting.append(objectN)
+                #print "[",
+                #for inter in interesting:
+                #    print "\"%s\","%inter,
+                #print"]"
+                if inter !="": 
+                    BR2=BlueRings(imdict,sigdict,psfdict,psfmode='match')
+                    BR2.plot()
             """
             plt.subplot(131)
             color = colorImage.ColorImage()
