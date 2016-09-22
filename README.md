@@ -14,7 +14,7 @@ This is research in progress. All content is Copyright 2016 The Authors, and the
 
 People working on this project:
 
-* Tom Collett (Portsmouth, DES SL: [@tcollett](https://github.com/DES-SL/BlueRings/issues/new?body=@tcollett))
+* Tom Collett (Portsmouth ICG, DES SL: [@tcollett](https://github.com/DES-SL/BlueRings/issues/new?body=@tcollett))
 * James Nightingale (Nottingham, DES SL)
 * Phil Marshall (KIPAC, DES Space Warps [@drphilmarshall](https://github.com/DES-SL/BlueRings/issues/new?body=@drphilmarshallt)))
 
