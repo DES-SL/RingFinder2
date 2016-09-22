@@ -19,7 +19,7 @@ class RingFindforTile(exceptions.Exception):
     def produce(self,infile):
         fitsfile = os.path.normpath(infile)
         fits = fitsio.FITS(fitsfile,'rw')
-
+                
         prihdr = fits[0].read_header()
         self.ncol = prihdr["NAXIS1"]
         self.nrow = prihdr["NAXIS2"]
@@ -78,6 +78,8 @@ class RingFindforTile(exceptions.Exception):
         fits = fitsio.FITS(fitsfile,'rw')
         interesting=[ "3017263885", "3017249430", "3017265746", "3017263357", "3017255895", "3017261463", "3017263527"]
 
+        cnt=0
+        ncnt=0
         for objectN in self.objects:
             objext = self.objext[objectN]
             outDir = "./gallery/"
@@ -98,7 +100,7 @@ class RingFindforTile(exceptions.Exception):
 
                 ext=objext[sw]
                 header = fits[ext].read_header()
-                sigdict[s] = (fits[ext].read()[a:-a,a:-a])**-2
+                sigdict[s] = (fits[ext].read()[a:-a,a:-a])**-.5
 
                 ext=objext[sp]
                 header = fits[ext].read_header()
@@ -111,9 +113,11 @@ class RingFindforTile(exceptions.Exception):
             #if objectN in interesting or int(objectN)>3017265667:
             if 1==1:
                 BR=BlueRings(imdict,sigdict,psfdict)
-                if BR.residualAnalyse(.2):
-                    inter=BR.plot()
+                if BR.residualAnalyse(threshold=3):
+                    inter=BR.plot(save=objectN)
+                    cnt+=1
                 else:
+                    ncnt+=1
                     inter=""
                 #if inter!="":interesting.append(objectN)
                 #print "[",
@@ -148,7 +152,8 @@ class RingFindforTile(exceptions.Exception):
             plt.draw()
             raw_input()
             """
-
+        print cnt,ncnt
+            
 if __name__ == "__main__":
     dir_input = "/home/ttemp/BlueRings/data/"
     file_input = "DES0005-0041_cutouts.fits"

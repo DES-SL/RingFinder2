@@ -2,6 +2,11 @@ import scipy.ndimage as  ndimage
 import pylab as plt
 import numpy
 
+
+#-----------------------------------------
+#Some functions Blue Rings needs
+
+
 def getPeak(img,x,y,boxsize=10):
     from scipy import ndimage
     img = img*1
@@ -83,8 +88,30 @@ def convolve(image,psf,doPSF=True,edgeCheck=True):
     return b,a
 
 
+
+
+#-----------------------------------------
+#Now we have the actual BlueRings code
+
+
 class BlueRings():
     def __init__(self,imdict,sigdict,psfdict,pixelsize=0.265,bands=['g','r','i','z'],zeropoint=30,psfmode="none"):
+        """
+        Code to do difference imaging of elliptical galaxies to look for blue features caused by gravitational lensing.
+
+        Example useage:
+        -----------------------------------
+        imdict={'g':g_image,'r':r_image,'i':i_image,'z':z_image}
+        sigdict={'g':g_sig,'r':r_sig,'i':i_sig,'z':z_sig}
+        psfdict={'g':g_psf,'r':r_psf,'i':i_psf,'z':z_psf}
+
+        BR=BlueRings(imdict,sigdict,psfdict)
+        BR.residualAnalyse(): 
+        grade=BR.plot() #NB plot ends with a raw_input()
+        ------------------------------------
+
+        Help: Tom Collett, thomas.collett@port.ac.uk
+        """
         self.imdict=imdict
         self.sigdict=sigdict
         self.psfdict=psfdict
@@ -138,16 +165,33 @@ class BlueRings():
                               alpha*sigdict[bandtosubtract]**2
                               )**0.5
 
-            print band,sigdict[band].mean(),alpha,sigdict[bandtosubtract].mean()
+            #print band,sigdict[band].mean(),alpha,sigdict[bandtosubtract].mean()
 
         return subdict,subsigdict
            
 
-    def residualAnalyse(self,threshold):
+    def residualAnalyse(self,threshold=3,apperture=4,pixelscale=0.263):
         import pylab as plt
 
-        D=self.subdict['g'].ravel()
-        S=self.subsigdict['g'].ravel()
+        D=self.subdict['g'].ravel()*1
+        S=self.subsigdict['g'].ravel()*1
+
+        from scipy.ndimage.filters import gaussian_filter as gf
+        Df=gf(D,1)
+        D[Df/S<1]=0
+
+        import indexTricks as iT
+        x,y=iT.coords(self.subdict['g'].shape)
+        x-=x.mean()
+        y-=y.mean()
+        r=((x**2+y**2)**0.5).ravel()
+
+        mask=r<(apperture/pixelscale)
+
+        D[mask==False]=0
+
+        self.Dsn=D.reshape(self.subdict['g'].shape)
+
 
         args=numpy.argsort(-D/S)
         D=numpy.take(D,args)
@@ -163,21 +207,57 @@ class BlueRings():
         else: return False
         
  
-    def plot(self,input=True):
+    def plot(self,input=True,save=False):
         import pylab as plt
+
+        figprops = dict(figsize=(7.0, 3.0), dpi=128)                                           # Figure properties
+        fig = plt.figure(1,**figprops)
+
+        # Need small space between subplots to avoid deletion due to overlap...
+        adjustprops = dict(\
+                           left=0.1,\
+                           bottom=0.1,\
+                           right=0.95,\
+                           top=0.95,\
+                           wspace=0.04,\
+                           hspace=0.08)
+        fig.subplots_adjust(**adjustprops)
+
+        # Font sizes:
+        params = { 'axes.labelsize': 16,
+                   'text.fontsize': 10,
+                   'legend.fontsize': 8,
+                   'xtick.labelsize': 10,
+                   'ytick.labelsize': 10}
+        plt.rcParams.update(params)
+
         import colorImage
-        plt.figure(1)
-        plt.subplot(131)
+        ax1=plt.subplot(131)
         color = colorImage.ColorImage()
+        color.nonlin=2
+
         colorimage = color.createModel(self.imdict['g'],self.imdict['r'],self.imdict['i'])
         plt.imshow(colorimage,interpolation="none")
-        plt.subplot(132)
+        ax1.xaxis.set_visible(False)
+        ax1.yaxis.set_visible(False)
+
+        ax2=plt.subplot(132)
         colorimage = color.colorize(self.subdict['g'],self.subdict['r'],self.subdict['i'])
         plt.imshow(colorimage,interpolation="none")
+        #plt.imshow(self.Dsn,interpolation="none")
+        ax2.xaxis.set_visible(False)
+        ax2.yaxis.set_visible(False)
 
-        plt.subplot(133)
+        ax3=plt.subplot(133)
         self.subdict['g'][self.subdict['g']<0]=0
         plt.imshow(self.subdict['g'],interpolation="none")
+        ax3.xaxis.set_visible(False)
+        ax3.yaxis.set_visible(False)
+
+        if save!=False:
+            plt.savefig("BRoutput_%s.png"%save)
+
         plt.draw()
+
         if input:return raw_input()
         else: return
